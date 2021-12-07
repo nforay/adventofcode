@@ -1,6 +1,5 @@
 #include <iostream>
 #include <vector>
-#include <sstream>
 #include <map>
 
 int main()
@@ -11,16 +10,8 @@ int main()
 	std::pair<int, int>					best_position(std::make_pair(INT32_MAX, 0));
 	int									cost = 0;
 
-	std::cin >> line; std::cin.ignore();
-	std::istringstream		ss(line);
-
-	while (std::getline(ss, line, ','))
-	{
-		std::istringstream	sspos(line);
-		int					pos = 0;
-		while (sspos >> pos)
-			crabs.push_back(pos);
-	}
+	while (std::getline(std::cin, line, ','))
+		crabs.push_back(atoi(line.c_str()));
 	for (auto &crab : crabs) {
 		if (tested[crab])
 			continue;
