@@ -2,29 +2,29 @@
 #include <map>
 #include <stack>
 
-int	line_score(std::string &str, std::map<char, int> &scale)
+int	line_score(const std::string &str, const std::map<char, int> &scale)
 {
 	std::stack<char>	symbols;
 	for (auto &c : str) {
 		switch (c) {
 			case ')':
 				if (symbols.top() != '(')
-					return (scale[c]);
+					return (scale.at(c));
 				symbols.pop();
 				break;
 			case ']':
 				if (symbols.top() != '[')
-					return (scale[c]);
+					return (scale.at(c));
 				symbols.pop();
 				break;
 			case '}':
 				if (symbols.top() != '{')
-					return (scale[c]);
+					return (scale.at(c));
 				symbols.pop();
 				break;
 			case '>':
 				if (symbols.top() != '<')
-					return (scale[c]);
+					return (scale.at(c));
 				symbols.pop();
 				break;
 			default:
