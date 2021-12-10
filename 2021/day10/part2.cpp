@@ -2,9 +2,9 @@
 #include <vector>
 #include <stack>
 
-void	line_score(const std::string &str, std::vector<int> &scores)
+void	line_score(const std::string &str, std::vector<long> &scores)
 {
-	int					score = 0;
+	long				score = 0;
 	std::stack<char>	symbols;
 
 	for (auto &c : str) {
@@ -63,7 +63,7 @@ void	line_score(const std::string &str, std::vector<int> &scores)
 int main()
 {
 	std::string				line;
-	std::vector<int>		scores;
+	std::vector<long>		scores;
 
 	while (std::getline(std::cin, line))
 		line_score(line, scores);
