@@ -23,7 +23,7 @@ int main()
 		for (int i = 0; i < 8; i++)
 			std::swap(fishes[i], fishes[i + 1]);
 		fishes[6] += fishes[8];
-		std::cout << "Day " << day << ": " << std::accumulate(fishes.begin(), fishes.end(), total) << " fishes\n";
+		std::cerr << "Day " << day << ": " << std::accumulate(fishes.begin(), fishes.end(), total) << " fishes\n";
 	}
 	std::cout << "Answer: " << std::accumulate(fishes.begin(), fishes.end(), total) << std::endl;
 	return (0);
