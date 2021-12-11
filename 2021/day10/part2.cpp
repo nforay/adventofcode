@@ -9,48 +9,19 @@ void	line_score(const std::string &str, std::vector<long> &scores)
 
 	for (auto &c : str) {
 		switch (c) {
-			case ')':
-				if (symbols.top() != '(')
-					return;
-				symbols.pop();
-				break;
-			case ']':
-				if (symbols.top() != '[')
-					return;
-				symbols.pop();
-				break;
-			case '}':
-				if (symbols.top() != '{')
-					return;
-				symbols.pop();
-				break;
-			case '>':
-				if (symbols.top() != '<')
-					return;
-				symbols.pop();
-				break;
-			default:
-				symbols.push(c);
+			case ')': if (symbols.top() != '(') return; symbols.pop(); break;
+			case ']': if (symbols.top() != '[') return; symbols.pop(); break;
+			case '}': if (symbols.top() != '{') return; symbols.pop(); break;
+			case '>': if (symbols.top() != '<') return; symbols.pop(); break;
+			default: symbols.push(c);
 		}
 	}
 	while (symbols.size()) {
 		switch (symbols.top()) {
-			case '(':
-				score = score * 5 + 1;
-				symbols.pop();
-				break;
-			case '[':
-				score = score * 5 + 2;
-				symbols.pop();
-				break;
-			case '{':
-				score = score * 5 + 3;
-				symbols.pop();
-				break;
-			case '<':
-				score = score * 5 + 4;
-				symbols.pop();
-				break;
+			case '(': score = score * 5 + 1; symbols.pop(); break;
+			case '[': score = score * 5 + 2; symbols.pop(); break;
+			case '{': score = score * 5 + 3; symbols.pop(); break;
+			case '<': score = score * 5 + 4; symbols.pop(); break;
 			default:
 				std::cerr << "Unexpected symbol: " << symbols.top() << std::endl;
 				return;
