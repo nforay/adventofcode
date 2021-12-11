@@ -66,5 +66,8 @@ int main()
 		}
 		step++;
 	}
+	for (int y = 0; y < 10; ++y)
+		for (int x = 0; x < 10; ++x)
+			delete octopus_grid[y][x];
 	return (0);
 }
