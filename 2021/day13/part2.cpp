@@ -3,6 +3,7 @@
 #include <list>
 #include <sstream>
 
+// set to 1 when using https://github.com/nothings/stb
 #define STB 0
 
 #ifdef STB
@@ -11,7 +12,9 @@
 
 	#define STB_IMAGE_WRITE_IMPLEMENTATION
 	#include "stb_image_write.h"
+#endif
 
+#ifdef STB_IMAGE_WRITE_IMPLEMENTATION
 	void vec_to_png(const std::vector<std::string> &paper)
 	{
 		static int filenum = 0;
@@ -56,18 +59,19 @@ int main()
 	std::vector<std::string>		paper;
 	std::string						folds;
 	std::string						line;
+	std::istringstream				ss;
 	int								width = 0;
 	int								height = 0;
 
 	while (std::getline(std::cin, line)) {
 		if (!line.size())
 			break;
-		std::stringstream	ss;
 		ss.str(line);
 		std::pair<int, int> dot;
 		ss >> dot.first; ss.ignore();
 		ss >> dot.second;
 		dots.push_back(dot);
+		ss.clear();
 	}
 	while (std::getline(std::cin, line))
 		folds.push_back(line[11]);
@@ -75,17 +79,19 @@ int main()
 		width = std::max(width, dot.first);
 		height = std::max(height, dot.second);
 	}
-	paper.resize(height + 1, std::string(width + 1, ' '));
+	height += 1 + (height % 2);
+	width += 1 + (width % 2);
+	paper.resize(height, std::string(width, ' '));
 	for (auto &dot : dots)
 		paper[dot.second][dot.first] = '#';
-#ifdef STB
+#ifdef STB_IMAGE_WRITE_IMPLEMENTATION
 	vec_to_png(paper);
 #endif
 	for (auto &fold : folds) {
 		fold_paper(paper, fold);
-		#ifdef STB
+#ifdef STB_IMAGE_WRITE_IMPLEMENTATION
 		vec_to_png(paper);
-		#endif
+#endif
 	}
 	for (auto &line : paper)
 		std::cout << line << std::endl;
