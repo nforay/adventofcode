@@ -31,7 +31,7 @@ int 	read_packet_data(std::vector<bool>::iterator &it, int &len, int subpacket)
 	std::cerr << std::string(subpacket, '\t') << "Type (";
 	int type = get_n_bits(it, 3, len);
 	std::cerr << ") = " << type << std::endl;
-	int value = 0;
+	long long value = 0;
 	if (type == 4) {
 		int groups = 0;
 		while (42) {
@@ -66,6 +66,7 @@ int 	read_packet_data(std::vector<bool>::iterator &it, int &len, int subpacket)
 			std::cerr << std::string(subpacket, '\t') << "Subpackets length (";
 			int length = get_n_bits(it, 15, len);
 			std::cerr << ") = " << length << std::endl;
+			len -= length;
 			while (length > 0) {
 				version += read_packet_data(it, length, subpacket + 1);
 				std::cerr << std::string(subpacket, '\t') << "Length remaining: " << length << std::endl;
