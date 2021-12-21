@@ -1,4 +1,5 @@
 #include <iostream>
+#include <vector>
 
 /**
  * I'd say this day's puzzle was the hardest so far, the goal is to deserialize
@@ -24,6 +25,25 @@ t_node	*create_node(t_node *parent, int value)
 	node->lchild = NULL;
 	node->rchild = NULL;
 	return (node);
+}
+
+t_node	*copy_tree(t_node *node, t_node *parent)
+{
+	t_node *newnode = create_node(parent, node->value);
+	if (node->lchild)
+		newnode->lchild = copy_tree(node->lchild, newnode);
+	if (node->rchild)
+		newnode->rchild = copy_tree(node->rchild, newnode);
+	return (newnode);
+}
+
+void	free_tree(t_node *node)
+{
+	if (node->lchild)
+		free_tree(node->lchild);
+	if (node->rchild)
+		free_tree(node->rchild);
+	delete node;
 }
 
 /** 
@@ -174,28 +194,41 @@ int magnitude(t_node *node)
 		magnitude(node->lchild);
 	if (node->rchild->lchild)
 		magnitude(node->rchild);
-	removechilds(node, 3 * node->lchild->value + 2 * node->rchild->value);
+	node->value = 3 * node->lchild->value + 2 * node->rchild->value;
 	return (node->value);
 }
 
 int		main()
 {
-	std::string		str;
-	t_node*			root = NULL;
-	t_node*			node = NULL;
+	std::string					str;
+	t_node*						root = NULL;
+	t_node*						node = NULL;
+	std::vector<std::string>	snailfishs;
+	int							magnitudemax = 0;
 
-	while (std::getline(std::cin, str)) {
-		if (!root) {
-			root = create_node(NULL, -1);
-			extractsnailfish(root, str, 1);
-		} else {
+	while (std::getline(std::cin, str))
+		snailfishs.push_back(str);
+	for (auto ita = snailfishs.begin(); ita != snailfishs.end(); ita++) {
+		root = create_node(NULL, -1);
+		extractsnailfish(root, *ita, 1);
+		for (auto itb = snailfishs.begin(); itb != snailfishs.end(); itb++) {
+			if (*ita == *itb)
+				continue;
 			node = create_node(NULL, -1);
-			extractsnailfish(node, str, 1);
-			root = add(root, node);
-			reduce(root);
+			extractsnailfish(node, *itb, 1);
+			t_node *altroot = copy_tree(root, NULL);
+			t_node *altnode = copy_tree(node, NULL);
+			t_node *scoperoot = copy_tree(root, NULL);
+			altnode = add(altnode, altroot);
+			scoperoot = add(scoperoot, node);
+			reduce(scoperoot);
+			reduce(altnode);
+			magnitudemax = std::max(magnitudemax, std::max(magnitude(scoperoot), magnitude(altnode)));
+			free_tree(scoperoot);
+			free_tree(altnode);
 		}
+		free_tree(root);
 	}
-	std::cout << "Answer: " << magnitude(root) << std::endl;
-	delete root;
+	std::cout << "Answer: " << magnitudemax << std::endl;
 	return (0);
 }
