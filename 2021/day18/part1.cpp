@@ -208,13 +208,10 @@ void	printjson(t_node *node, bool once, std::string &cmp)
 
 int magnitude(t_node *node)
 {
-	std::cerr << "magnitude" << std::endl;
-	if (node->lchild)
+	if (node->lchild->lchild)
 		magnitude(node->lchild);
-	if (node->rchild)
+	if (node->rchild->lchild)
 		magnitude(node->rchild);
-	if (node->parent)
-		node = node->parent;
 	removechilds(node, 3 * node->lchild->value + 2 * node->rchild->value);
 	return (node->value);
 }
@@ -263,6 +260,6 @@ int		main()
 		}
 	}
 	std::cout << "Answer: " << magnitude(root) << std::endl;
-	free_tree(root);
+	delete root;
 	return (0);
 }
