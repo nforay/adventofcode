@@ -58,7 +58,21 @@ void	extractsnailfish(t_node *node, const std::string &str, int depth)
 	}
 }
 
-void	removechilds(t_node *node)
+t_node	*leftmost(t_node *root)
+{
+	while (root->lchild)
+		root = root->lchild;
+	return (root);
+}
+
+t_node	*rightmost(t_node *root)
+{
+	while (root->rchild)
+		root = root->rchild;
+	return (root);
+}
+
+void	removechilds(t_node *node, int newvalue)
 {
 	if (node->lchild)
 		delete node->lchild;
@@ -66,12 +80,12 @@ void	removechilds(t_node *node)
 		delete node->rchild;
 	node->lchild = NULL;
 	node->rchild = NULL;
-	node->value = 0;
+	node->value = newvalue;
 }
 
 void	addleft(t_node *node, int value)
 {
-	node = node->parent;
+	//node = node->parent;
 	while (node->parent && node->parent->lchild == node)
 		node = node->parent;
 	if (node->parent)
@@ -83,6 +97,7 @@ void	addleft(t_node *node, int value)
 
 void	addright(t_node *node, int value)
 {
+	//node = node->parent;
 	while (node->parent && node->parent->rchild == node)
 		node = node->parent;
 	if (node->parent)
@@ -92,64 +107,68 @@ void	addright(t_node *node, int value)
 	node->value += value;
 }
 
-void	explode(t_node *node)
+void	printjson(t_node *node, bool once, std::string &cmp);
+void	explode(t_node *root, t_node *node)
 {
-	std::cerr << "Explode " << node->lchild->value << " " << node->rchild->value << std::endl;
-	addleft(node->lchild, node->lchild->value);
+	if (leftmost(root) != node->lchild)
+		addleft(node->lchild, node->lchild->value);
+	if (rightmost(root) != node->rchild)
 	addright(node->rchild, node->rchild->value);
-	removechilds(node);
+	removechilds(node, 0);
+	while (node->parent)
+		node = node->parent;
+	std::string compare;
+	printjson(node, true, compare);
+	std::cerr << compare << std::endl;
 }
 
 void	splits(t_node *node)
 {
-	std::cerr << "splits" << std::endl;
 	node->lchild = create_node(node, node->value / 2);
 	node->rchild = create_node(node, node->value - node->lchild->value);
 	node->value = -1;
+	while (node->parent)
+		node = node->parent;
+	std::string compare;
+	printjson(node, true, compare);
 }
 
-bool	reducepairs(t_node *node, int depth)
+void reduce(t_node *root);
+void	reducepairs(t_node *root, t_node *node, int depth)
 {
 	if (node->lchild)
-		reducepairs(node->lchild, depth + 1);
+		reducepairs(root, node->lchild, depth + 1);
 	if (node->rchild)
-		reducepairs(node->rchild, depth + 1);
+		reducepairs(root, node->rchild, depth + 1);
 	if (!node->lchild && !node->rchild) {
 		if (depth > 4) {
-			explode(node->parent);
-			return (true);
+			explode(root, node->parent);
+			reduce(root);
 		}
 	}
-	return (false);
 }
 
-bool	reducevalue(t_node *node)
+void	reducevalue(t_node *root, t_node *node)
 {
 	if (node->lchild)
-		reducevalue(node->lchild);
+		reducevalue(root, node->lchild);
 	if (node->rchild)
-		reducevalue(node->rchild);
+		reducevalue(root, node->rchild);
 	if (node->value > 9) {
 		splits(node);
-		return (true);
+		reduce(root);
 	}
-	return (false);
 }
 
 void	reduce(t_node *root)
 {
-	std::cerr << "Reduce" << std::endl;
-	if (reducepairs(root, 0))
-		reduce(root);
-	if (reducevalue(root))
-		reduce(root);
+	reducepairs(root, root, 0);
+	reducevalue(root, root);
 }
 
 t_node	*add(t_node *lhs, t_node *rhs)
 {
-	std::cerr << "add" << std::endl;
-	t_node *newroot = new t_node;
-	newroot->parent = NULL;
+	t_node *newroot = create_node(NULL, -1);
 	lhs->parent = newroot;
 	rhs->parent = newroot;
 	newroot->lchild = lhs;
@@ -172,7 +191,7 @@ void	printjson(t_node *node, bool once, std::string &cmp)
 	if (node->lchild)
 		cmp.push_back('[');
 	if (!node->lchild) {
-		cmp.push_back('0' + node->value);
+		cmp += std::to_string(node->value);
 		if (node && node == node->parent->lchild)
 			cmp.push_back(',');
 	} else
@@ -187,17 +206,37 @@ void	printjson(t_node *node, bool once, std::string &cmp)
 	}
 }
 
+int magnitude(t_node *node)
+{
+	std::cerr << "magnitude" << std::endl;
+	if (node->lchild)
+		magnitude(node->lchild);
+	if (node->rchild)
+		magnitude(node->rchild);
+	if (node->parent)
+		node = node->parent;
+	removechilds(node, 3 * node->lchild->value + 2 * node->rchild->value);
+	return (node->value);
+}
+
 int		main()
 {
 	std::string		str;
-	t_node*			root;
+	t_node*			root = NULL;
+	t_node*			node = NULL;
 	int fail = 0;
 
 	while (std::getline(std::cin, str)) {
-		root = create_node(NULL, -1);
-		extractsnailfish(root, str, 1);
 		std::string compare;
-		printjson(root, true, compare);
+		if (!root) {
+			root = create_node(NULL, -1);
+			extractsnailfish(root, str, 1);
+			printjson(root, true, compare);
+		} else {
+			node = create_node(NULL, -1);
+			extractsnailfish(node, str, 1);
+			printjson(node, true, compare);
+		}
 		std::cerr << str << std::endl;
 		std::cerr << compare << " " << (str == compare ? "\e[32m[OK]\e[39m" : "\e[31m[KO]\e[39m") << std::endl;
 		if (str != compare) {
@@ -205,19 +244,25 @@ int		main()
 			free_tree(root);
 			continue;
 		}
-		/*std::cerr << "Nodes:" << std::endl;
-		for (int i = 1; i < 6; i++) {
-			std::cerr << "Depth " << i << ": ";
-			printnodelevel(root, 0, i);
-			std::cerr << std::endl;
-		}*/
-		reduce(root);
+		if (node != NULL) {
+			compare.clear();
+			printjson(root, true, compare);
+			std::cerr << compare << " + ";
+			compare.clear();
+			printjson(node, true, compare);
+			std::cerr << compare << " = " << std::endl;
+			root = add(root, node);
+			reduce(root);
+		}
 		compare.clear();
 		printjson(root, true, compare);
-		std::cerr << compare << std::endl;
+		std::cerr << "\t\t\t" << compare << std::endl;
 		//std::cout << "Answer: " << "" << std::endl;
-		free_tree(root);
+		if (node) {
+			node = NULL;
+		}
 	}
-	std::cout << "Answer: " << fail << std::endl;
+	std::cout << "Answer: " << magnitude(root) << std::endl;
+	free_tree(root);
 	return (0);
 }
